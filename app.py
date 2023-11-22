@@ -59,8 +59,9 @@ def fetch_hotel_data(city, checkin_date, checkout_date):
             name = hotel_box.find('div', class_='f6431b446c a15b38c233').get_text(strip=True) if hotel_box.find('div', class_='f6431b446c a15b38c233') else "No Name"
             location = hotel_box.find('span', class_='aee5343fdb def9bc142a').get_text(strip=True) if hotel_box.find('span', class_='aee5343fdb def9bc142a') else "No Location"
 
-            price = hotel_box.find("div", xpath="/html/body/div[5]/div/div[4]/div/div[2]/div[3]/div[2]/div[2]/div[3]/div[38]/div[1]/div[2]/div/div[2]/div[2]/div/div[1]/span/div/div[1]/span[1]").text.get_text(strip=True) if hotel_box.find("div", xpath="/html/body/div[5]/div/div[4]/div/div[2]/div[3]/div[2]/div[2]/div[3]/div[38]/div[1]/div[2]/div/div[2]/div[2]/div/div[1]/span/div/div[1]/span[1]") else "No Price"
-
+            #price = hotel_box.find("div", xpath="/html/body/div[5]/div/div[4]/div/div[2]/div[3]/div[2]/div[2]/div[3]/div[38]/div[1]/div[2]/div/div[2]/div[2]/div/div[1]/span/div/div[1]/span[1]").text.get_text(strip=True) if hotel_box.find("div", xpath="/html/body/div[5]/div/div[4]/div/div[2]/div[3]/div[2]/div[2]/div[3]/div[38]/div[1]/div[2]/div/div[2]/div[2]/div/div[1]/span/div/div[1]/span[1]") else "No Price"
+            price = hotel_box.find('span', class_="f6431b446c fbfd7c1165 e84eb96b1f").get_text(strip=True) if hotel_box.find('span', class_="f6431b446c fbfd7c1165 e84eb96b1f") else "No Price"
+            #print(price)
             rating = hotel_box.find("div", class_="a3b8729ab1 d86cee9b25").get_text(strip=True) if hotel_box.find("div", class_="a3b8729ab1 d86cee9b25") else "No Rating"
             distance = hotel_box.find("span", {"data-testid": "distance"}).get_text(strip=True) if hotel_box.find("span", {"data-testid": "distance"}) else "No Distance"
             comment = hotel_box.find('div', class_='a3b8729ab1 e6208ee469 cb2cbb3ccb').get_text(strip=True) if hotel_box.find('div', class_='a3b8729ab1 e6208ee469 cb2cbb3ccb') else "No Comment"
@@ -74,10 +75,21 @@ def fetch_hotel_data(city, checkin_date, checkout_date):
 
 # STEP 2
 def process_hotel_data(df):
-    # If Price is missing, assign a random number between 200 and 10000
+    # print(df['Price'])
+    # print(df['Price'].str.split(' ')[1])
+    # print("=====================================")
+    # print(df['Price'].str.split(' ')[0])
+    # print("=====================================")
+    # print(df['Price'].str.split(' ')[1].str.replace('TWD\xa02', ''))
+    df['Price'] = df['Price'].astype(str)
+    #df['Price'] = df['Price'].str.split(' ').str[1]
+    df['Price'] = df['Price'].str.replace(',', '')
+    df['Price'] = df['Price'].str.replace('TWD\xa0', '')
+    #df['Price'] = df['Price'].str.split(' ').str[0]
+    #print(df['Price'])
     df['Price'] = df['Price'].replace('No Price', np.nan)
-    df['Price'] = df['Price'].fillna(random.randint(200, 10000))
     df['Price'] = df['Price'].astype('Int64')
+    df['Price'].fillna(0, inplace=True)
 
     # Convert Rating to numeric and coerce errors
     df['Rating'] = pd.to_numeric(df['Rating'], errors='coerce').astype(float)
